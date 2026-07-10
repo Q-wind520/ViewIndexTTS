@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 import time
-import winsound
+from playsound3 import playsound
 from pathlib import Path
 from threading import Thread
 from tkinter import filedialog
@@ -498,7 +498,6 @@ class TtsApp:
         self._btn_play.visible = False
         self._txt_file_info.value = ""
         if self._is_playing:
-            winsound.PlaySound(None, winsound.SND_PURGE)
             self._is_playing = False
         self.page.update()
 
@@ -578,12 +577,10 @@ class TtsApp:
 
         Thread(target=_run, daemon=True).start()
 
-    # ── Playback (winsound) ───────────────────────────────────
+    # ── Playback ──────────────────────────────────────────────
 
     def _on_play(self, e):
         if self._is_playing:
-            # Stop
-            winsound.PlaySound(None, winsound.SND_PURGE)
             self._is_playing = False
             self._btn_play.content = "播放"
             self._btn_play.icon = ft.Icons.PLAY_ARROW
@@ -593,12 +590,8 @@ class TtsApp:
         if not self._current_audio or not Path(self._current_audio).exists():
             self._snack("没有可播放的音频文件")
             return
-        winsound.PlaySound(None, winsound.SND_PURGE)
         try:
-            winsound.PlaySound(
-                self._current_audio,
-                winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT,
-            )
+            Thread(target=lambda: playsound(self._current_audio), daemon=True).start()
             self._is_playing = True
             self._btn_play.content = "停止"
             self._btn_play.icon = ft.Icons.STOP
