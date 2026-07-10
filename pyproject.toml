@@ -1,0 +1,14 @@
+[project]
+name = "atri-index-tts-gui"
+version = "1.0.0"
+description = "ATRI-IndexTTS GUI 前端"
+readme = "AGENTS.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flet>=0.25.0",
+    "httpx>=0.28.0",
+    "python-dotenv>=1.0.0",
+]
+
+[tool.uv]
+package = false
