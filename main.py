@@ -10,14 +10,15 @@ from gui.app import TtsApp
 # Only active when the bundled directory exists (Nuitka build).
 # In dev mode (python main.py), falls through to Flet's normal mechanism.
 _EXE_DIR = Path(sys.argv[0]).resolve().parent
-_FLET_VIEW = _EXE_DIR / "flet_client"
-if sys.platform == "win32":
-    _FLET_VIEW = _FLET_VIEW / "flet"
-elif sys.platform == "linux":
-    _FLET_VIEW = _FLET_VIEW / "flet"
-# macOS: top-level .app is inside flet_client/
+if sys.platform == "darwin":
+    # main.app/Contents/MacOS → ../../.. → Flet.app alongside main.app
+    _FLET_VIEW = _EXE_DIR.parent.parent.parent / "Flet.app"
+elif sys.platform == "win32":
+    _FLET_VIEW = _EXE_DIR / "flet_client" / "flet"
+else:
+    _FLET_VIEW = _EXE_DIR / "flet_client" / "flet"
 
-if (_FLET_VIEW / "flet.exe" if sys.platform == "win32" else _FLET_VIEW).exists() or _FLET_VIEW.exists():
+if _FLET_VIEW.exists():
     os.environ["FLET_VIEW_PATH"] = str(_FLET_VIEW)
 
 if __name__ == "__main__":

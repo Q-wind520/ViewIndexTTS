@@ -18,13 +18,17 @@ jobs:
             artifact-dir: dist/main.dist
             flet-artifact: flet-windows.zip
             extract-cmd: unzip -q flet_archive -d flet_client && rm flet_archive
+            flet-data-dir: --include-data-dir=flet_client=flet_client
 
           - os: macos-latest
             label: macOS
             nuitka-args: --macos-create-app-bundle
-            artifact-dir: dist/main.app
+            artifact-dir: |
+              dist/main.app
+              dist/Flet.app
             flet-artifact: flet-macos.tar.gz
             extract-cmd: tar -xzf flet_archive -C flet_client && rm flet_archive
+            flet-data-dir: ""
 
           - os: ubuntu-latest
             label: Linux
@@ -32,6 +36,7 @@ jobs:
             artifact-dir: dist/main.dist
             flet-artifact: flet-linux-ubuntu24.04-amd64.tar.gz
             extract-cmd: tar -xzf flet_archive -C flet_client && rm flet_archive
+            flet-data-dir: --include-data-dir=flet_client=flet_client
 
     runs-on: ${{ matrix.os }}
 
@@ -77,12 +82,16 @@ jobs:
             --include-package=gui,httpx,playsound3,dotenv,flet,flet_desktop \
             --include-package-data=flet \
             --include-data-dir=gui=gui \
-            --include-data-dir=flet_client=flet_client \
+            ${{ matrix.flet-data-dir }} \
             --output-dir=dist \
             --output-filename=ATRI-IndexTTS \
             ${{ matrix.nuitka-args }} \
             --assume-yes-for-downloads \
             main.py
+
+      - name: Copy Flet.app alongside main.app (macOS)
+        if: runner.os == 'macOS'
+        run: cp -R flet_client/Flet.app dist/Flet.app
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
