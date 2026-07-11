@@ -1,21 +1,14 @@
+<h1 align="center" style="color: #fb8aaa">ViewIndexTTS</h1>
+
 <p align="center">
-  <img src="https://via.placeholder.com/120x120/6366f1/ffffff?text=View" width="120" height="120" alt="ViewIndexTTS">
+  IndexTTS-2 模型的可视化桌面客户端<br>
+  由 <b><a src="https://github.com/index-tts/index-tts">IndexTTS-2</a></b> 提供中英文高质量语音合成，支持情感控制与自定义音色
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/GUI-Flet_0.85-6366f1?logo=flet&logoColor=white" alt="Flet">
-  <img src="https://img.shields.io/badge/TTS-IndexTTS--2-10b981?logo=openai&logoColor=white" alt="IndexTTS-2">
-  <img src="https://img.shields.io/badge/API-AstraFlow-f97316?logo=icloud&logoColor=white" alt="AstraFlow">
-  <img src="https://img.shields.io/badge/Platform-Win_|_macOS_|_Linux-808080?logo=linux&logoColor=white" alt="Cross-platform">
   <img src="https://img.shields.io/badge/License-MIT-6366f1" alt="MIT">
-</p>
-
-<h1 align="center">ViewIndexTTS</h1>
-
-<p align="center">
-  IndexTTS-2 模型的可视化桌面客户端<br>
-  通过 <b>AstraFlow API</b> 提供中英文高质量语音合成，支持情感控制与自定义音色
 </p>
 
 ---
