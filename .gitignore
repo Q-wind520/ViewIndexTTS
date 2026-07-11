@@ -25,4 +25,6 @@ Thumbs.db
 /.omo
 /.opencode
 /dist*
+/flet_client/
+/flet_tmp_*
 

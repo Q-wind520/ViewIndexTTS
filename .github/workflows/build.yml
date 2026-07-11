@@ -17,18 +17,21 @@ jobs:
             nuitka-args: --windows-console-mode=disable
             artifact-dir: dist/main.dist
             flet-artifact: flet-windows.zip
+            extract-cmd: unzip -q flet_archive -d flet_client && rm flet_archive
 
           - os: macos-latest
             label: macOS
             nuitka-args: --macos-create-app-bundle
             artifact-dir: dist/main.app
             flet-artifact: flet-macos.tar.gz
+            extract-cmd: tar -xzf flet_archive -C flet_client && rm flet_archive
 
           - os: ubuntu-latest
             label: Linux
             nuitka-args: ""
             artifact-dir: dist/main.dist
             flet-artifact: flet-linux-ubuntu24.04-amd64.tar.gz
+            extract-cmd: tar -xzf flet_archive -C flet_client && rm flet_archive
 
     runs-on: ${{ matrix.os }}
 
@@ -61,10 +64,10 @@ jobs:
         run: |
           FLET_VERSION=$(python -c "import flet_desktop; print(flet_desktop.version.version)")
           FLET_URL="https://github.com/flet-dev/flet/releases/download/v${FLET_VERSION}/${{ matrix.flet-artifact }}"
-          APP_DIR=$(python -c "import flet_desktop; from pathlib import Path; print(Path(flet_desktop.__file__).parent / 'app')")
-          mkdir -p "$APP_DIR"
           echo "Downloading Flet client v${FLET_VERSION}: ${{ matrix.flet-artifact }}"
-          curl -fsSL -o "${APP_DIR}/${{ matrix.flet-artifact }}" "$FLET_URL"
+          curl -fsSL -o flet_archive "$FLET_URL"
+          mkdir -p flet_client
+          ${{ matrix.extract-cmd }}
 
       - name: Build with Nuitka
         shell: bash
@@ -72,8 +75,9 @@ jobs:
           python -m nuitka --standalone \
             --enable-plugin=tk-inter \
             --include-package=gui,httpx,playsound3,dotenv,flet,flet_desktop \
-            --include-package-data=flet,flet_desktop \
+            --include-package-data=flet \
             --include-data-dir=gui=gui \
+            --include-data-dir=flet_client=flet_client \
             --output-dir=dist \
             --output-filename=ATRI-IndexTTS \
             ${{ matrix.nuitka-args }} \
