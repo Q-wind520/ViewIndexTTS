@@ -134,34 +134,104 @@ jobs:
             -ov -format UDZO \
             "dist/ViewIndexTTS-${VERSION}.dmg"
 
+      # ── Package archives with platform-appropriate extensions ──
+
+      - name: Package Windows portable (.zip)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          cd dist/main.dist
+          7z a -tzip "../ViewIndexTTS-Windows-${VERSION}.zip" .
+          cd ../..
+
+      - name: Package Linux portable (.tar.gz)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          tar -czf "dist/ViewIndexTTS-Linux-${VERSION}.tar.gz" -C dist/main.dist .
+
+      - name: Package macOS portable (.zip)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          cd dist
+          7z a -tzip "ViewIndexTTS-macOS-${VERSION}.zip" main.app Flet.app
+          cd ..
+
       # ── Upload artifacts ──
 
-      - name: Upload portable (Windows / Linux)
-        if: runner.os != 'macOS'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ViewIndexTTS-${{ matrix.label }}-Portable
-          path: dist/main.dist
-
-      - name: Upload portable (macOS)
-        if: runner.os == 'macOS'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ViewIndexTTS-${{ matrix.label }}-Portable
-          path: |
-            dist/main.app
-            dist/Flet.app
-
-      - name: Upload installer (Windows)
+      - name: Upload Windows portable
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: ViewIndexTTS-${{ matrix.label }}-Setup
-          path: dist/ViewIndexTTS-Setup-*.exe
+          name: ViewIndexTTS-Windows-Portable-${VERSION}
+          path: dist/ViewIndexTTS-Windows-${VERSION}.zip
 
-      - name: Upload DMG (macOS)
+      - name: Upload Windows installer
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViewIndexTTS-Windows-Setup-${VERSION}
+          path: dist/ViewIndexTTS-Setup-${VERSION}.exe
+
+      - name: Upload Linux portable
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViewIndexTTS-Linux-Portable-${VERSION}
+          path: dist/ViewIndexTTS-Linux-${VERSION}.tar.gz
+
+      - name: Upload macOS portable
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: ViewIndexTTS-${{ matrix.label }}-DMG
-          path: dist/ViewIndexTTS-*.dmg
+          name: ViewIndexTTS-macOS-Portable-${VERSION}
+          path: dist/ViewIndexTTS-macOS-${VERSION}.zip
+
+      - name: Upload macOS DMG
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViewIndexTTS-macOS-DMG-${VERSION}
+          path: dist/ViewIndexTTS-${VERSION}.dmg
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        shell: bash
+        run: |
+          VER="${{ github.ref_name }}"
+          echo "VERSION=${VER#v}" >> $GITHUB_ENV
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: ViewIndexTTS-*-*
+
+      - name: Rename artifacts for release
+        shell: bash
+        run: |
+          mkdir -p release
+          for dir in artifacts/*/; do
+            file=$(ls "$dir" | head -1)
+            cp "$dir$file" "release/$file"
+          done
+          ls -la release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ViewIndexTTS ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: release/*
