@@ -1,8 +1,4 @@
-# UI
-
-## 占位符
-
-# Backend
+# IndexTTS-2
 
 ## AstraFlow API
 
