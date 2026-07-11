@@ -14,18 +14,21 @@ jobs:
         include:
           - os: windows-latest
             label: Windows
-            nuitka-args: --windows-console-mode=attach --include-package=flet
+            nuitka-args: --windows-console-mode=attach
             artifact-dir: dist/main.dist
+            flet-artifact: flet-windows.zip
 
           - os: macos-latest
             label: macOS
-            nuitka-args: --macos-create-app-bundle --include-package=flet
+            nuitka-args: --macos-create-app-bundle
             artifact-dir: dist/main.app
+            flet-artifact: flet-macos.tar.gz
 
           - os: ubuntu-latest
             label: Linux
-            nuitka-args: --include-package=flet
+            nuitka-args: ""
             artifact-dir: dist/main.dist
+            flet-artifact: flet-linux-ubuntu24.04-amd64.tar.gz
 
     runs-on: ${{ matrix.os }}
 
@@ -51,16 +54,25 @@ jobs:
           brew install python-tk@3.12 || true
 
       - name: Install dependencies
+        run: pip install httpx flet playsound3 python-dotenv nuitka
+
+      - name: Bundle Flet desktop client
+        shell: bash
         run: |
-          pip install httpx flet playsound3 python-dotenv nuitka
+          FLET_VERSION=$(python -c "import flet_desktop; print(flet_desktop.version.version)")
+          FLET_URL="https://github.com/flet-dev/flet/releases/download/v${FLET_VERSION}/${{ matrix.flet-artifact }}"
+          APP_DIR=$(python -c "import flet_desktop; from pathlib import Path; print(Path(flet_desktop.__file__).parent / 'app')")
+          mkdir -p "$APP_DIR"
+          echo "Downloading Flet client v${FLET_VERSION}: ${{ matrix.flet-artifact }}"
+          curl -fsSL -o "${APP_DIR}/${{ matrix.flet-artifact }}" "$FLET_URL"
 
       - name: Build with Nuitka
         shell: bash
         run: |
           python -m nuitka --standalone \
             --enable-plugin=tk-inter \
-            --include-package=gui,httpx,playsound3,dotenv \
-            --include-package-data=flet \
+            --include-package=gui,httpx,playsound3,dotenv,flet,flet_desktop \
+            --include-package-data=flet,flet_desktop \
             --include-data-dir=gui=gui \
             --output-dir=dist \
             --output-filename=ATRI-IndexTTS \
