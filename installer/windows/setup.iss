@@ -15,7 +15,7 @@
 #define MyAppExeName "ViewIndexTTS.exe"
 
 [Setup]
-AppId={% raw %}{{F8A3B6D1-9E2C-4A5F-8D7E-1C4B6A8F9E3D}{% endraw %}
+AppId={{F8A3B6D1-9E2C-4A5F-8D7E-1C4B6A8F9E3D}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}

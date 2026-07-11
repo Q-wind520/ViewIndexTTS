@@ -43,6 +43,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
 
       - name: Extract version
         shell: bash
@@ -76,6 +77,14 @@ jobs:
           mkdir -p flet_client
           ${{ matrix.extract-cmd }}
 
+      - name: Cache Nuitka
+        uses: actions/cache@v4
+        with:
+          path: build/cache
+          key: nuitka-${{ runner.os }}-${{ hashFiles('gui/**/*.py') }}
+          restore-keys: |
+            nuitka-${{ runner.os }}-
+
       - name: Build with Nuitka
         shell: bash
         run: |
@@ -106,9 +115,9 @@ jobs:
 
       - name: Build installer (Windows)
         if: runner.os == 'Windows'
-        shell: bash
+        shell: pwsh
         run: |
-          "C:/Program Files (x86)/Inno Setup 6/ISCC.exe" /DMyAppVersion=${VERSION} installer/windows/setup.iss
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DMyAppVersion=$env:VERSION" "installer\windows\setup.iss"
 
       # ── macOS: DMG ──
 
