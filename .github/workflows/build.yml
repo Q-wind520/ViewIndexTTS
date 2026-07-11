@@ -49,6 +49,7 @@ jobs:
           pip install httpx flet playsound3 python-dotenv nuitka
 
       - name: Build with Nuitka
+        shell: bash
         run: |
           python -m nuitka --standalone \
             --enable-plugin=tk-inter \
