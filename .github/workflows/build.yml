@@ -54,7 +54,7 @@ jobs:
           brew install python-tk@3.12 || true
 
       - name: Install dependencies
-        run: pip install httpx flet playsound3 python-dotenv nuitka
+        run: pip install httpx "flet[desktop]" playsound3 python-dotenv nuitka
 
       - name: Bundle Flet desktop client
         shell: bash
