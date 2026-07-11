@@ -164,36 +164,36 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: ViewIndexTTS-Windows-Portable-${VERSION}
-          path: dist/ViewIndexTTS-Windows-${VERSION}.zip
+          name: ViewIndexTTS-Windows-Portable-${{ env.VERSION }}
+          path: dist/ViewIndexTTS-Windows-${{ env.VERSION }}.zip
 
       - name: Upload Windows installer
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: ViewIndexTTS-Windows-Setup-${VERSION}
-          path: dist/ViewIndexTTS-Setup-${VERSION}.exe
+          name: ViewIndexTTS-Windows-Setup-${{ env.VERSION }}
+          path: dist/ViewIndexTTS-Setup-${{ env.VERSION }}.exe
 
       - name: Upload Linux portable
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: ViewIndexTTS-Linux-Portable-${VERSION}
-          path: dist/ViewIndexTTS-Linux-${VERSION}.tar.gz
+          name: ViewIndexTTS-Linux-Portable-${{ env.VERSION }}
+          path: dist/ViewIndexTTS-Linux-${{ env.VERSION }}.tar.gz
 
       - name: Upload macOS portable
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: ViewIndexTTS-macOS-Portable-${VERSION}
-          path: dist/ViewIndexTTS-macOS-${VERSION}.zip
+          name: ViewIndexTTS-macOS-Portable-${{ env.VERSION }}
+          path: dist/ViewIndexTTS-macOS-${{ env.VERSION }}.zip
 
       - name: Upload macOS DMG
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: ViewIndexTTS-macOS-DMG-${VERSION}
-          path: dist/ViewIndexTTS-${VERSION}.dmg
+          name: ViewIndexTTS-macOS-DMG-${{ env.VERSION }}
+          path: dist/ViewIndexTTS-${{ env.VERSION }}.dmg
 
   release:
     needs: build
