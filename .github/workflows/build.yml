@@ -213,18 +213,11 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
-          pattern: ViewIndexTTS-*-*
+          path: release
+          merge-multiple: true
 
-      - name: Rename artifacts for release
-        shell: bash
-        run: |
-          mkdir -p release
-          for dir in artifacts/*/; do
-            file=$(ls "$dir" | head -1)
-            cp "$dir$file" "release/$file"
-          done
-          ls -la release/
+      - name: List release files
+        run: ls -la release/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
