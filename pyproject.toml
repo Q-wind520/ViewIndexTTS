@@ -5,7 +5,7 @@ description = "ATRI-IndexTTS GUI 前端"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "flet>=0.25.0",
+    "flet[desktop]>=0.25.0",
     "httpx>=0.28.0",
     "playsound3>=3.3.0",
     "python-dotenv>=1.0.0",
