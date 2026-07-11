@@ -15,7 +15,6 @@ jobs:
           - os: windows-latest
             label: Windows
             nuitka-args: --windows-console-mode=disable
-            artifact-dir: dist/main.dist
             flet-artifact: flet-windows.zip
             extract-cmd: unzip -q flet_archive -d flet_client && rm flet_archive
             flet-data-dir: --include-data-dir=flet_client=flet_client
@@ -23,9 +22,6 @@ jobs:
           - os: macos-latest
             label: macOS
             nuitka-args: --macos-create-app-bundle
-            artifact-dir: |
-              dist/main.app
-              dist/Flet.app
             flet-artifact: flet-macos.tar.gz
             extract-cmd: tar -xzf flet_archive -C flet_client && rm flet_archive
             flet-data-dir: ""
@@ -33,7 +29,6 @@ jobs:
           - os: ubuntu-latest
             label: Linux
             nuitka-args: ""
-            artifact-dir: dist/main.dist
             flet-artifact: flet-linux-ubuntu24.04-amd64.tar.gz
             extract-cmd: tar -xzf flet_archive -C flet_client && rm flet_archive
             flet-data-dir: --include-data-dir=flet_client=flet_client
@@ -47,6 +42,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Extract version
+        shell: bash
+        run: |
+          VER="${{ github.ref_name }}"
+          echo "VERSION=${VER#v}" >> $GITHUB_ENV
 
       - name: Install system deps (Linux)
         if: runner.os == 'Linux'
@@ -89,12 +90,70 @@ jobs:
             --assume-yes-for-downloads \
             main.py
 
+      # ── macOS: place Flet.app alongside main.app ──
+
       - name: Copy Flet.app alongside main.app (macOS)
         if: runner.os == 'macOS'
         run: cp -R flet_client/Flet.app dist/Flet.app
 
-      - name: Upload artifact
+      # ── Windows: Inno Setup 6 installer ──
+
+      - name: Install Inno Setup (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: choco install innosetup -y --no-progress
+
+      - name: Build installer (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          "C:/Program Files (x86)/Inno Setup 6/ISCC.exe" \
+            /DMyAppVersion="${VERSION}" \
+            installer/windows/setup.iss
+
+      # ── macOS: DMG ──
+
+      - name: Create DMG (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          mkdir -p dmg_staging
+          cp -R dist/main.app dmg_staging/
+          cp -R dist/Flet.app dmg_staging/
+          hdiutil create \
+            -volname ViewIndexTTS \
+            -srcfolder dmg_staging \
+            -ov -format UDZO \
+            "dist/ViewIndexTTS-${VERSION}.dmg"
+
+      # ── Upload artifacts ──
+
+      - name: Upload portable (Windows / Linux)
+        if: runner.os != 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: ViewIndexTTS-${{ matrix.label }}
-          path: ${{ matrix.artifact-dir }}
+          name: ViewIndexTTS-${{ matrix.label }}-Portable
+          path: dist/main.dist
+
+      - name: Upload portable (macOS)
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViewIndexTTS-${{ matrix.label }}-Portable
+          path: |
+            dist/main.app
+            dist/Flet.app
+
+      - name: Upload installer (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViewIndexTTS-${{ matrix.label }}-Setup
+          path: dist/ViewIndexTTS-Setup-*.exe
+
+      - name: Upload DMG (macOS)
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViewIndexTTS-${{ matrix.label }}-DMG
+          path: dist/ViewIndexTTS-*.dmg
